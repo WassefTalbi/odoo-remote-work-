@@ -1,0 +1,3 @@
+id,name,model_id:id,groups,perm_read,perm_write,perm_create,perm_unlink,domain_force
+hr_attendance_employee_rule,Employee Attendance Restriction,model_hr_attendance,base.group_user,1,0,0,0,[('employee_id.user_id', '=', user.id)]
+hr_attendance_manager_rule,Manager Full Access,model_hr_attendance,hr_attendance.group_hr_attendance_manager,1,1,1,1,[]

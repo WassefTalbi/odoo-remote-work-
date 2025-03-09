@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <data>
+
+
+        <!-- Action to open the breaks wizard -->
+        <record id="action_open_attendance_wizard" model="ir.actions.act_window">
+            <field name="name">Attendance Details</field>
+            <field name="res_model">hr.break.wizard</field>
+            <field name="view_mode">form</field>
+            <field name="target">new</field>
+            <field name="context">{'default_attendance_id': active_id}</field>
+        </record>
+
+        <!-- Action definition -->
+        <record id="action_hr_attendance_list" model="ir.actions.act_window">
+            <field name="name">Import-Export</field>
+            <field name="res_model">hr.attendance</field>
+            <field name="view_mode">tree</field>
+            <field name="view_id" ref="hr_attendance_tree_view"/>
+        </record>
+
+        <!-- Tree view definition -->
+        <record id="hr_attendance_tree_view" model="ir.ui.view">
+            <field name="name">hr.attendance.tree</field>
+            <field name="model">hr.attendance</field>
+            <field name="arch" type="xml">
+                <tree>
+                    <field name="check_in"/>
+                    <field name="check_out"/>
+                    <field name="worked_hours" decoration-danger="is_under_8_hours"/>
+                    <field name="overtime_hours"/>
+                    <button string="View Break Details" type="object" name="action_view_attendance_details" class="btn-info" icon="fa-eye"/>
+                    <field name="is_under_8_hours" invisible="1" optional="1"/>
+
+                </tree>
+            </field>
+        </record>
+
+        <!-- Root menu -->
+        <menuitem id="menu_hr_attendance_root" name="CheckAndBreak" sequence="10" action="action_hr_attendance_list"/>
+
+        <!-- Main submenu -->
+        <menuitem id="menu_hr_attendance_main" name="Attendances" parent="menu_hr_attendance_root" sequence="20"/>
+
+        <!-- Check In-Out menu -->
+        <menuitem id="checkin_checkout_wizard_menu" name="Check In-Out" parent="menu_hr_attendance_main" action="action_checkin_checkout_wizard"/>
+
+        <!-- Pause-Reprise menu -->
+        <menuitem id="pause_reprise_wizard_menu" name="Pause-Reprise" parent="menu_hr_attendance_main" action="action_pause_reprise_wizard"/>
+    </data>
+</odoo>

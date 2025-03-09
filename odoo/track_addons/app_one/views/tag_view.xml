@@ -1,0 +1,60 @@
+<odoo>
+     <record id="tag_view_tree" model="ir.ui.view">
+        <field name="name">tag action</field>
+        <field name="model">tag</field>
+         <field name="arch" type="xml">
+             <tree >
+                        <field name="name"/>
+
+             </tree>
+         </field>
+    </record>
+     <record id="tag_view_form" model="ir.ui.view">
+        <field name="name">tag action</field>
+        <field name="model">tag</field>
+         <field name="arch" type="xml">
+
+             <form >
+                 <sheet>
+
+                     <group>
+                                <field name="name"/>
+
+
+                     </group>
+                              <!--   <group>
+                                     <field name="property_ids" widget="many2many_tags"/>
+                                 </group>-->
+
+                 </sheet>
+
+
+             </form>
+         </field>
+    </record>
+
+    <!-- <record id="property_view_search" model="ir.ui.view">
+        <field name="name">property action</field>
+        <field name="model">property</field>
+         <field name="arch" type="xml">
+
+             <search>
+                 <field name="postcode"/>
+                 <field name="name"/>
+                 <filter name="is_garden" string="With Garden" domain="[('garden','=','True')]"></filter>
+                 <filter name="with garden" string="group Garden" context="{'group_by':'garden'}"></filter>
+             </search>
+         </field>
+    </record>-->
+    <record id="tag_action" model="ir.actions.act_window">
+        <field name="name">tag action</field>
+        <field name="res_model">tag</field>
+    </record>
+    <menuitem
+        id="tag_menu_item"
+        name="Tags"
+        parent="config_menu"
+        action="tag_action"
+    />
+
+</odoo>
