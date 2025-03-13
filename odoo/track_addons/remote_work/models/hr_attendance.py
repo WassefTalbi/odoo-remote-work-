@@ -1,4 +1,6 @@
 from odoo import models, fields, api
+from odoo.http import request
+from odoo import http, _
 from datetime import datetime, timedelta
 from odoo.exceptions import ValidationError, UserError
 class HrAttendance(models.Model):
@@ -59,3 +61,14 @@ class HrAttendance(models.Model):
                 attendance.overtime_hours = attendance.worked_hours - 8
             else:
                 attendance.overtime_hours = 0
+
+    def _get_geoip_response(mode, latitude=False, longitude=False):
+        return {
+            'city': request.geoip.city.name or _('Unknown'),
+            'country_name': request.geoip.country.name or request.geoip.continent.name or _('Unknown'),
+            'latitude': latitude or request.geoip.location.latitude or False,
+            'longitude': longitude or request.geoip.location.longitude or False,
+            'ip_address': request.geoip.ip,
+            'browser': request.httprequest.user_agent.browser,
+            'mode': mode
+        }

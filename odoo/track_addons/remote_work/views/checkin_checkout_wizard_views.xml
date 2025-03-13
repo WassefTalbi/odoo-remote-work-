@@ -5,20 +5,21 @@
         <field name="model">checkin.checkout.wizard</field>
         <field name="arch" type="xml">
             <form string="Check-IN / Check-OUT Management">
-                <sheet>
-                    <group>
-                        <field name="employee_id" readonly="1"/>
-                        <field name="check_in" readonly="1"/>
-                         <field name="disabled_check_in" invisible="1"/>
-
-                    <field name="disabled_check_out" invisible="1"/>
-                    </group>
-                    <footer>
-                        <button name="toggle_checkin" type="object" string="Check In" class="btn-primary"  invisible="disabled_check_in"/>
-                        <button name="toggle_checkout" type="object" string="Check Out" class="btn-danger" invisible="disabled_check_out" />
-                        <button string="Cancel" class="btn-secondary" special="cancel"/>
-                    </footer>
-                </sheet>
+                   <sheet>
+                        <group>
+                            <field name="employee_id" readonly="1"/>
+                            <field name="check_in" readonly="1"/>
+                            <field name="disabled_check_in" invisible="1"/>
+                            <field name="disabled_check_out" invisible="1"/>
+                            <field name="is_on_break" invisible="1"/>
+                        </group>
+                        <footer>
+                            <button name="toggle_checkin" type="object" string="Check In" class="btn-primary" invisible="disabled_check_in"/>
+                            <button name="toggle_checkout" type="object" string="Check Out" class="btn-danger" invisible="disabled_check_out or is_on_break"/>
+                            <p invisible="not is_on_break" class="text-danger">Please end the break before checking out.</p>
+                            <button string="Cancel" class="btn-secondary" invisible="is_on_break" special="cancel"/>
+                        </footer>
+                   </sheet>
             </form>
         </field>
     </record>

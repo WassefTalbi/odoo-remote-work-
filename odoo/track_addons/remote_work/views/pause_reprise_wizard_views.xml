@@ -12,14 +12,15 @@
                     <field name="total_break_time" readonly="1"/>
                     <field name="disabled_break" invisible="1"/>
                     <field name="disabled_resume" invisible="1"/>
+                    <field name="has_checked_in" invisible="1"/>
                 </group>
                 <footer>
                     <button name="start_break" type="object" string="Start Break" class="btn-warning"
-                            invisible="disabled_break"/>
+                            invisible="not has_checked_in or disabled_break"/>
                     <button name="end_break" type="object" string="End Break" class="btn-success"
                             invisible="disabled_resume"/>
-
-                    <button string="Cancel" class="btn-secondary" special="cancel"/>
+                    <p invisible="has_checked_in" class="text-warning">Please check in before starting a break.</p>
+                    <button string="Cancel" class="btn-secondary" invisible="not has_checked_in" special="cancel"/>
                 </footer>
             </sheet>
         </form>

@@ -12,9 +12,9 @@ class PauseRepriseWizard(models.TransientModel):
     break_start = fields.Datetime(string="Break Start Time", readonly=True)
     break_end = fields.Datetime(string="Break End Time", readonly=True)
     total_break_time = fields.Float(string="Total Break Time", compute="_compute_total_break_time", store=True)
-
     disabled_break = fields.Boolean(compute="_compute_disabled_break", store=False)
     disabled_resume = fields.Boolean(compute="_compute_disabled_resume", store=False)
+    has_checked_in = fields.Boolean(compute="_compute_has_checked_in", store=False)
     process = None
     SCRIPT_PATH = os.path.expanduser("~/PycharmProjects/ScriptDev/TrackUserSystemApplications.py")
     VENV_PATH = os.path.expanduser("~/PycharmProjects/ScriptDev/.venv/bin/activate")
@@ -72,7 +72,12 @@ class PauseRepriseWizard(models.TransientModel):
                 'total_break_time': self._compute_total_break_time()
             })
         return res
-
+    @api.depends('employee_id')
+    def _compute_has_checked_in(self):
+        """ Check if the employee has checked in """
+        for record in self:
+            attendance = self._get_active_attendance()
+            record.has_checked_in = bool(attendance)
     @api.depends('employee_id')
     def _compute_disabled_break(self):
         """ Disable 'Start Break' if already on a break """
@@ -80,7 +85,6 @@ class PauseRepriseWizard(models.TransientModel):
             active_attendance = record._get_active_attendance()
             active_break = record._get_active_break(active_attendance)
             record.disabled_break = bool(active_break and not active_break.break_end)
-
     @api.depends('employee_id')
     def _compute_disabled_resume(self):
         """ Disable 'Resume Work' if not on a break """
@@ -88,21 +92,18 @@ class PauseRepriseWizard(models.TransientModel):
             active_attendance = record._get_active_attendance()
             active_break = record._get_active_break(active_attendance)
             record.disabled_resume = not (active_break and not active_break.break_end)
-
     def _get_active_attendance(self):
         """ Get the current active attendance record """
         return self.env['hr.attendance'].search([
             ('employee_id', '=', self.env.user.employee_id.id),
             ('check_out', '=', False)
         ], limit=1)
-
     def _get_active_break(self, attendance):
         """ Get the most recent break under the given attendance """
         return self.env['hr.break'].search([
             ('attendance_id', '=', attendance.id),
             ('break_end', '=', False)
         ], order="break_start desc", limit=1)
-
     @api.depends('employee_id')
     def _compute_total_break_time(self):
         """ Compute total break time from all related breaks """
@@ -113,7 +114,6 @@ class PauseRepriseWizard(models.TransientModel):
                 record.total_break_time = total_breaks
             else:
                 record.total_break_time = 0.0
-
     def start_break(self):
         """ Start a new Break (creates hr.break record) """
         attendance = self._get_active_attendance()
@@ -124,7 +124,6 @@ class PauseRepriseWizard(models.TransientModel):
                 'break_start': fields.Datetime.now()
             })
         return self._reload_wizard()
-
     def end_break(self):
         """ Resume Work (Ends the most recent break) """
         attendance = self._get_active_attendance()
@@ -139,7 +138,6 @@ class PauseRepriseWizard(models.TransientModel):
                     'break_duration': break_duration
                 })
         return self._reload_wizard()
-
     def _reload_wizard(self):
         """ Refresh the wizard after performing a break or resume action """
         return {
@@ -147,7 +145,7 @@ class PauseRepriseWizard(models.TransientModel):
             'res_model': 'hr.attendance',
             'view_mode': 'tree',
             'target': 'current',
-            'views': [(self.env.ref('hr_attendance.view_attendance_tree').id, 'tree')],
+            'views': [(self.env.ref('remote_work.hr_attendance_tree_view').id, 'tree')],
             'context': {
                 'default_employee_id': self.env.user.employee_id.id,
                 'search_default_filter': 1
