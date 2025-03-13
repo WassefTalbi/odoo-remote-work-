@@ -9,7 +9,7 @@ class PauseRepriseWizard(models.TransientModel):
     _description = 'Wizard for Employee Break Management'
 
     employee_id = fields.Many2one('hr.employee', string="Employee", required=True)
-    break_start = fields.Datetime(string="Break Start Time", readonly=True)
+    break_start = fields.Datetime(string="Break Start Time", compute="_compute_break_start",readonly=True)
     break_end = fields.Datetime(string="Break End Time", readonly=True)
     total_break_time = fields.Float(string="Total Break Time", compute="_compute_total_break_time", store=True)
     disabled_break = fields.Boolean(compute="_compute_disabled_break", store=False)
@@ -68,10 +68,22 @@ class PauseRepriseWizard(models.TransientModel):
         if employee:
             res.update({
                 'employee_id': employee.id,
-                'break_start': fields.Datetime.now(),
-                'total_break_time': self._compute_total_break_time()
             })
         return res
+
+    @api.depends('employee_id')
+    def _compute_break_start(self):
+        """ Compute the break start time based on the employee's active break """
+        for record in self:
+            attendance = record._get_active_attendance()
+            if attendance:
+                active_break = record._get_active_break(attendance)
+                if active_break:
+                    record.break_start = active_break.break_start
+                else:
+                    record.break_start = fields.Datetime.now()
+            else:
+                record.break_start = False
     @api.depends('employee_id')
     def _compute_has_checked_in(self):
         """ Check if the employee has checked in """

@@ -5,7 +5,8 @@ from datetime import datetime, timedelta
 from odoo.exceptions import ValidationError, UserError
 class HrAttendance(models.Model):
     _inherit = 'hr.attendance'
-
+    worked_hours = fields.Float(string="Worked Hours", compute="_compute_worked_hours", store=True)
+    worked_hours_display = fields.Char(string="Worked Hours ", compute="_compute_worked_hours", store=True)
     break_ids = fields.One2many("hr.break", "attendance_id", string="Breaks")
     total_break_time = fields.Float(string="Total Break Time (minutes)", compute="_compute_total_break_time", store=True)
     is_under_8_hours = fields.Boolean(string="is_under_8_hours ",compute="_compute_is_under_8_hours", store=False)
@@ -18,19 +19,20 @@ class HrAttendance(models.Model):
 
     @api.depends('check_in', 'check_out', 'total_break_time')
     def _compute_worked_hours(self):
-        """ Compute the worked hours, subtracting the total break time """
+        """ Compute the worked hours, subtracting the total break time, and display in hours and minutes """
         for attendance in self:
             if attendance.check_in and attendance.check_out:
                 delta = attendance.check_out - attendance.check_in
                 total_seconds = delta.total_seconds()
-                # Convert total_break_time from minutes to seconds
                 total_break_seconds = attendance.total_break_time * 60
-                # Subtract break time from total worked time
                 worked_seconds = total_seconds - total_break_seconds
-                # Convert worked_seconds to hours
                 attendance.worked_hours = worked_seconds / 3600
+                hours = int(worked_seconds // 3600)
+                minutes = int((worked_seconds % 3600) // 60)
+                attendance.worked_hours_display = f"{hours} hours and {minutes} minutes"
             else:
                 attendance.worked_hours = 0
+                attendance.worked_hours_display = "0 hours and 0 minutes"
 
     def action_view_attendance_details(self):
         """ Open the attendance details wizard """

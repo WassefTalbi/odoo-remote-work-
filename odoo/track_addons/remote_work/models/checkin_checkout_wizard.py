@@ -79,7 +79,7 @@ class CheckinCheckoutWizard(models.TransientModel):
             if attendance:
                 record.check_in = attendance.check_in
             else:
-                record.check_in = False
+                record.check_in = fields.Datetime.now()
     @api.depends('employee_id')
     def _compute_disabled_check_in(self):
         for record in self:
@@ -112,9 +112,6 @@ class CheckinCheckoutWizard(models.TransientModel):
         self.run_script()
         attendance = self.env['hr.attendance'].create({
             'employee_id': self.env.user.employee_id.id ,
-            'check_in': fields.Datetime.now(),
-        })
-        self.write({
             'check_in': fields.Datetime.now(),
         })
         return  {
